@@ -14,10 +14,10 @@ namespace KcpProject.Sample
             connection.AckNoDelay = true;
             connection.WriteDelay = false;
 
-            connection.Connect("127.0.0.1", 4444);
+            connection.Connect("127.0.0.1", 1060, 0xCBCBCBCB);
 
             var stopSend = false;
-            var buffer = new byte[1500];
+            var buffer = new byte[150];
             var counter = 0;
             var sendBytes = 0;
             var recvBytes = 0;

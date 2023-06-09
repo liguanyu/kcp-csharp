@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -25,29 +25,31 @@ namespace KcpProject
         private DateTime startDt = DateTime.Now;
         const int logmask = KCP.IKCP_LOG_IN_ACK | KCP.IKCP_LOG_OUT_ACK | KCP.IKCP_LOG_IN_DATA | KCP.IKCP_LOG_OUT_DATA;
 
-        public void Connect(string host, int port)
+        public void Connect(string host, int port, uint conv)
         {
-            IPHostEntry hostEntry = Dns.GetHostEntry(host);
-            if (hostEntry.AddressList.Length == 0)
-            {
-                throw new Exception("Unable to resolve host: " + host);
-            }
-            var endpoint = hostEntry.AddressList[0];
-            mSocket = new Socket(endpoint.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
-            mSocket.Connect(endpoint, port);
+            //IPHostEntry hostEntry = Dns.GetHostEntry(host);
+            //if (hostEntry.AddressList.Length == 0)
+            //{
+            //    throw new Exception("Unable to resolve host: " + host);
+            //}
+            //var endpoint = hostEntry.AddressList[0];
+            IPAddress ip = IPAddress.Parse(host.Trim());
+            IPEndPoint ipEndPoint = new IPEndPoint(ip, port);
+            mSocket = new Socket(ipEndPoint.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
+            mSocket.Connect(ipEndPoint);
             RemoteAddress = (IPEndPoint)mSocket.RemoteEndPoint;
             LocalAddress = (IPEndPoint)mSocket.LocalEndPoint;
-            mKCP = new KCP((uint)(new Random().Next(1, Int32.MaxValue)), rawSend);
+            mKCP = new KCP(conv, rawSend);
             // normal:  0, 40, 2, 1
             // fast:    0, 30, 2, 1
             // fast2:   1, 20, 2, 1
             // fast3:   1, 10, 2, 1
             mKCP.NoDelay(0, 30, 2, 1);
-            mKCP.SetStreamMode(true);
+            //mKCP.SetStreamMode(true);
 
             // Log
-            //mKCP.SetLogger(Log);
-            //mKCP.SetLogMask(logmask);
+            mKCP.SetLogger(Log);
+            mKCP.SetLogMask(logmask);
 
             mRecvBuffer.Clear();
         }
