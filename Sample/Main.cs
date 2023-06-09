@@ -10,6 +10,8 @@ namespace KcpProject.Sample
     {
         static void Main(string[] args)
         {
+            Console.WriteLine("www");
+
             var connection = new UDPSession();
             connection.AckNoDelay = true;
             connection.WriteDelay = false;
@@ -22,15 +24,23 @@ namespace KcpProject.Sample
             var sendBytes = 0;
             var recvBytes = 0;
 
-            while (true) {
+            string str = "Hello, world!";
+            byte[] stringBytes = Encoding.UTF8.GetBytes(str);
+            Array.Copy(stringBytes, 0, buffer, 0, Math.Min(stringBytes.Length, buffer.Length));
+
+
+            while (true)
+            {
                 connection.Update();
 
-                if (!stopSend)  {
+                if (!stopSend)
+                {
                     //firstSend = false;
                     // Console.WriteLine("Write Message...");
                     //var text = Encoding.UTF8.GetBytes(string.Format("Hello KCP: {0}", ++counter));
                     var sent = connection.Send(buffer, 0, buffer.Length);
-                    if (sent < 0) {
+                    if (sent < 0)
+                    {
                         Console.WriteLine("Write message failed.");
                         break;
                     }
@@ -39,7 +49,7 @@ namespace KcpProject.Sample
                     {
                         counter++;
                         sendBytes += buffer.Length;
-                        if (counter >= 500)
+                        if (counter >= 10)
                             stopSend = true;
                     }
                 }
@@ -55,13 +65,14 @@ namespace KcpProject.Sample
                     Console.WriteLine("Receive Message failed.");
                     break;
                 }
-                else {
+                else
+                {
                     recvBytes += n;
                     Console.WriteLine($"{recvBytes} / {sendBytes}");
                 }
 
-                //var resp = Encoding.UTF8.GetString(buffer, 0, n);
-                //Console.WriteLine("Received Message: " + resp);
+                var resp = Encoding.UTF8.GetString(buffer, 0, n);
+                Console.WriteLine("Received Message: " + resp);
             }
         }
     }
